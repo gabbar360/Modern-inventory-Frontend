@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import {
   House, Users as UsersIcon, UsersThree, Package, FileText, ClipboardText,
   Receipt, CreditCard, Storefront, Gear, MagnifyingGlass, Sun, Moon,
@@ -20,7 +21,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const NAV = [
   { group: "Workspace", items: [
-    { to: "/", icon: House, label: "Dashboard", key: "dashboard" },
+    { to: "/dashboard", icon: House, label: "Dashboard", key: "dashboard" },
     { to: "/tasks", icon: CheckSquare, label: "Tasks", key: "tasks" },
     { to: "/approvals", icon: CheckSquare, label: "Approvals", key: "approvals" },
     { to: "/ai", icon: Sparkle, label: "AI Copilot", key: "ai" },
@@ -70,6 +71,7 @@ const NAV = [
 ];
 
 function Sidebar({ collapsed, setCollapsed }) {
+  const pathname = usePathname();
   return (
     <aside className={`${collapsed ? "w-16" : "w-60"} shrink-0 border-r border-border bg-card transition-all duration-200 hidden md:flex flex-col`}>
       <div className="h-14 flex items-center px-3 border-b border-border">
@@ -87,16 +89,15 @@ function Sidebar({ collapsed, setCollapsed }) {
           <div key={g.group}>
             {!collapsed && <div className="nav-group-title">{g.group}</div>}
             {g.items.map((it) => (
-              <NavLink
+              <Link
                 key={it.key}
-                to={it.to}
-                end={it.to === "/"}
-                className={({ isActive }) => `nav-link mx-2 ${isActive ? "active" : ""}`}
+                href={it.to}
+                className={`nav-link mx-2 ${pathname === it.to ? "active" : ""}`}
                 data-testid={`nav-${it.key}`}
               >
                 <it.icon size={16} weight="regular" />
                 {!collapsed && <span>{it.label}</span>}
-              </NavLink>
+              </Link>
             ))}
           </div>
         ))}
@@ -108,7 +109,7 @@ function Sidebar({ collapsed, setCollapsed }) {
 function GlobalSearch({ open, setOpen }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
-  const nav = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (!q || q.length < 2) { setResults([]); return; }
@@ -125,7 +126,7 @@ function GlobalSearch({ open, setOpen }) {
       "Lead": `/leads`, "Customer": `/customers/${r.id}`, "Product": `/products`,
       "Quotation": `/quotations/${r.id}`, "Sales Order": `/sales-orders`, "Invoice": `/invoices/${r.id}`,
     };
-    nav(map[r.type] || "/");
+    router.push(map[r.type] || "/dashboard");
   };
 
   return (
@@ -185,7 +186,7 @@ function NotificationBell() {
 function Topbar({ onSearch }) {
   const { user, org, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const nav = useNavigate();
+  const router = useRouter();
   const initials = useMemo(() => (user?.name || "U").split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase(), [user]);
   return (
     <header className="h-14 border-b border-border bg-card/70 backdrop-blur sticky top-0 z-30 flex items-center gap-3 px-4">
@@ -204,13 +205,13 @@ function Topbar({ onSearch }) {
             <Button variant="outline" size="sm" className="h-8" data-testid="quick-add-btn"><Plus size={14} className="mr-1" />New</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => nav("/leads")} data-testid="quick-new-lead">New Lead</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav("/customers")}>New Customer</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav("/quotations")}>New Quotation</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav("/sales-orders")}>New Sales Order</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav("/invoices")}>New Invoice</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav("/payments")}>Receive Payment</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav("/products")}>New Product</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/leads")} data-testid="quick-new-lead">New Lead</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/customers")}>New Customer</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/quotations")}>New Quotation</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/sales-orders")}>New Sales Order</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/invoices")}>New Invoice</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/payments")}>Receive Payment</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/products")}>New Product</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <NotificationBell />
@@ -232,7 +233,7 @@ function Topbar({ onSearch }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => nav("/settings")}>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/settings")}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} data-testid="logout-btn"><SignOut size={14} className="mr-2" />Sign out</DropdownMenuItem>
           </DropdownMenuContent>
@@ -243,10 +244,10 @@ function Topbar({ onSearch }) {
 }
 
 function BottomNav({ onSearch }) {
-  const nav = useNavigate();
+  const router = useRouter();
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-card border-t border-border flex items-center justify-around z-40 pb-safe">
-      <button onClick={() => nav("/")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
+      <button onClick={() => router.push("/dashboard")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
         <House size={20} />
         <span className="text-[9px] font-medium">Home</span>
       </button>
@@ -254,14 +255,14 @@ function BottomNav({ onSearch }) {
         <MagnifyingGlass size={20} />
         <span className="text-[9px] font-medium">Search</span>
       </button>
-      <button onClick={() => nav("/quotations")} className="flex flex-col items-center gap-1 text-emerald-600">
+      <button onClick={() => router.push("/quotations")} className="flex flex-col items-center gap-1 text-emerald-600">
         <div className="bg-emerald-100 dark:bg-emerald-900/30 p-1.5 rounded-full"><Plus size={18} /></div>
       </button>
-      <button onClick={() => nav("/leads")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
+      <button onClick={() => router.push("/leads")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
         <UsersIcon size={20} />
         <span className="text-[9px] font-medium">Leads</span>
       </button>
-      <button onClick={() => nav("/settings")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
+      <button onClick={() => router.push("/settings")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
         <Gear size={20} />
         <span className="text-[9px] font-medium">Menu</span>
       </button>
@@ -269,7 +270,7 @@ function BottomNav({ onSearch }) {
   );
 }
 
-export default function AppShell() {
+export default function AppShell({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   useEffect(() => {
@@ -284,7 +285,7 @@ export default function AppShell() {
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar onSearch={() => setSearchOpen(true)} />
-        <main className="flex-1 p-4 md:p-6"><Outlet /></main>
+        <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
       <BottomNav onSearch={() => setSearchOpen(true)} />
       <GlobalSearch open={searchOpen} setOpen={setSearchOpen} />

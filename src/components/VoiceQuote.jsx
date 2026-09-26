@@ -60,7 +60,7 @@ export default function VoiceQuoteButton({ onParsed }) {
               : <Button size="sm" variant="destructive" onClick={stop} data-testid="voice-stop-btn"><MicrophoneSlash size={14} className="mr-1"/>Stop</Button>}
             {listening && <span className="text-xs text-rose-600 animate-pulse">● Recording…</span>}
           </div>
-          <Textarea rows={5} value={transcript} onChange={(e)=>setTranscript(e.target.value)}
+          <Textarea name="transcript" id="voicequote-transcript" rows={5} value={transcript} onChange={(e)=>setTranscript(e.target.value)}
             placeholder="Your dictation will appear here — or type it in." data-testid="voice-transcript" />
           <Button className="w-full h-9" onClick={parse} disabled={busy || !transcript.trim()} data-testid="voice-parse-btn">
             {busy ? "AI parsing…" : "Parse to draft quotation"}

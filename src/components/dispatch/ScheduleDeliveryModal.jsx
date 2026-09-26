@@ -327,9 +327,9 @@ export function ScheduleDeliveryModal({
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Pickup Location (Delhivery Facility)</Label>
+                  <Label htmlFor="scheduledeliverymodal-field-1" className="text-xs font-medium">Pickup Location (Delhivery Facility)</Label>
                   <Select value={pickupLocation} onValueChange={setPickupLocation}>
-                    <SelectTrigger className="h-8 text-xs mt-1">
+                    <SelectTrigger name="field_2" id="scheduledeliverymodal-field-1" className="h-8 text-xs mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -349,8 +349,8 @@ export function ScheduleDeliveryModal({
                 </div>
 
                 <div>
-                  <Label className="text-xs font-medium">Pickup Date</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-pickupdate" className="text-xs font-medium">Pickup Date</Label>
+                  <Input name="pickupdate" id="scheduledeliverymodal-pickupdate"
                     type="date"
                     className="h-8 text-xs mt-1"
                     value={pickupDate}
@@ -359,9 +359,9 @@ export function ScheduleDeliveryModal({
                 </div>
 
                 <div>
-                  <Label className="text-xs font-medium">Time Window Slot</Label>
+                  <Label htmlFor="scheduledeliverymodal-field-2" className="text-xs font-medium">Time Window Slot</Label>
                   <Select value={pickupTimeSlot} onValueChange={setPickupTimeSlot}>
-                    <SelectTrigger className="h-8 text-xs mt-1">
+                    <SelectTrigger name="field_3" id="scheduledeliverymodal-field-2" className="h-8 text-xs mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -376,17 +376,10 @@ export function ScheduleDeliveryModal({
               {/* Optional / Mandatory E-Way Bill Number */}
               <div className="p-2.5 rounded-lg border border-border bg-muted/20 space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs font-medium flex items-center gap-1.5">
-                    <span>E-Way Bill Number (EWB)</span>
-                    {Number(order?.grand_total || 0) > 50000 && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-semibold">
-                        Required for Orders &gt; ₹50,000
-                      </span>
-                    )}
-                  </Label>
+                  <Label htmlFor="scheduledeliverymodal-classname-text-xs-font-medium-flex-items-center-gap-1-5"> className="text-xs font-medium flex items-center gap-1.5"</Label>
                   <span className="text-[10px] text-muted-foreground">12-digit Indian GST e-Way Bill</span>
                 </div>
-                <Input
+                <Input name="e-g-241001234567" id="scheduledeliverymodal-e-g-241001234567"
                   type="text"
                   placeholder="e.g. 241001234567"
                   className="h-8 text-xs font-mono"
@@ -399,10 +392,7 @@ export function ScheduleDeliveryModal({
               {/* Packaging & Multi-Product Aggregation Table */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold flex items-center gap-1.5">
-                    <Package className="h-3.5 w-3.5 text-blue-600" />
-                    Packaging, Box Aggregation & Dimensions
-                  </Label>
+                  <Label htmlFor="scheduledeliverymodal-classname-text-xs-font-semibold-flex-items-center-gap-1-5"> className="text-xs font-semibold flex items-center gap-1.5"</Label>
                   <span className="text-[10px] text-muted-foreground">Volumetric divisor: 5000 (L×W×H/5000)</span>
                 </div>
 
@@ -429,7 +419,7 @@ export function ScheduleDeliveryModal({
                             {row.ordered_quantity.toLocaleString()}
                           </td>
                           <td className="py-2 px-2 text-center">
-                            <Input
+                            <Input name="box_count" id="scheduledeliverymodal-box_count"
                               type="number"
                               className="h-7 text-xs text-center w-16 mx-auto"
                               value={row.box_count}
@@ -437,7 +427,7 @@ export function ScheduleDeliveryModal({
                             />
                           </td>
                           <td className="py-2 px-2 text-center">
-                            <Input
+                            <Input name="unit_dead_weight_kg" id="scheduledeliverymodal-unit_dead_weight_kg"
                               type="number"
                               step="0.5"
                               className="h-7 text-xs text-center w-20 mx-auto"
@@ -447,21 +437,21 @@ export function ScheduleDeliveryModal({
                           </td>
                           <td className="py-2 px-2 text-center">
                             <div className="flex items-center gap-1 justify-center">
-                              <Input
+                              <Input name="l" id="scheduledeliverymodal-l"
                                 placeholder="L"
                                 className="h-7 text-[11px] text-center w-11 px-0"
                                 value={row.length_cm}
                                 onChange={(e) => updateLine(idx, 'length_cm', Number(e.target.value))}
                               />
                               <span className="text-muted-foreground text-[10px]">×</span>
-                              <Input
+                              <Input name="w" id="scheduledeliverymodal-w"
                                 placeholder="W"
                                 className="h-7 text-[11px] text-center w-11 px-0"
                                 value={row.width_cm}
                                 onChange={(e) => updateLine(idx, 'width_cm', Number(e.target.value))}
                               />
                               <span className="text-muted-foreground text-[10px]">×</span>
-                              <Input
+                              <Input name="h" id="scheduledeliverymodal-h"
                                 placeholder="H"
                                 className="h-7 text-[11px] text-center w-11 px-0"
                                 value={row.height_cm}
@@ -548,8 +538,8 @@ export function ScheduleDeliveryModal({
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Transporter / Courier Name</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-e-g-v-trans-logistics-self-fleet-tci" className="text-xs font-medium">Transporter / Courier Name</Label>
+                  <Input name="e-g-v-trans-logistics-self-fleet-tci" id="scheduledeliverymodal-e-g-v-trans-logistics-self-fleet-tci"
                     className="h-8 text-xs mt-1"
                     placeholder="e.g. V-Trans Logistics, Self-Fleet, TCI"
                     value={privateForm.carrier_name}
@@ -557,8 +547,8 @@ export function ScheduleDeliveryModal({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Vehicle / Truck Number</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-e-g-mh-04-ab-1234" className="text-xs font-medium">Vehicle / Truck Number</Label>
+                  <Input name="e-g-mh-04-ab-1234" id="scheduledeliverymodal-e-g-mh-04-ab-1234"
                     className="h-8 text-xs mt-1"
                     placeholder="e.g. MH-04-AB-1234"
                     value={privateForm.vehicle_number}
@@ -569,8 +559,8 @@ export function ScheduleDeliveryModal({
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Driver Name</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-driver-full-name" className="text-xs font-medium">Driver Name</Label>
+                  <Input name="driver-full-name" id="scheduledeliverymodal-driver-full-name"
                     className="h-8 text-xs mt-1"
                     placeholder="Driver full name"
                     value={privateForm.driver_name}
@@ -578,8 +568,8 @@ export function ScheduleDeliveryModal({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Driver Phone</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-10-digit-mobile" className="text-xs font-medium">Driver Phone</Label>
+                  <Input name="10-digit-mobile" id="scheduledeliverymodal-10-digit-mobile"
                     className="h-8 text-xs mt-1"
                     placeholder="10-digit mobile"
                     value={privateForm.driver_phone}
@@ -587,8 +577,8 @@ export function ScheduleDeliveryModal({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">LR / Tracking Number</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-e-g-vt-984210" className="text-xs font-medium">LR / Tracking Number</Label>
+                  <Input name="e-g-vt-984210" id="scheduledeliverymodal-e-g-vt-984210"
                     className="h-8 text-xs mt-1"
                     placeholder="e.g. VT-984210"
                     value={privateForm.lr_number}
@@ -599,8 +589,8 @@ export function ScheduleDeliveryModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Scheduled Dispatch Date</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-dispatch_date" className="text-xs font-medium">Scheduled Dispatch Date</Label>
+                  <Input name="dispatch_date" id="scheduledeliverymodal-dispatch_date"
                     type="date"
                     className="h-8 text-xs mt-1"
                     value={privateForm.dispatch_date}
@@ -608,8 +598,8 @@ export function ScheduleDeliveryModal({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Total Package / Box Count</Label>
-                  <Input
+                  <Label htmlFor="scheduledeliverymodal-total_packages" className="text-xs font-medium">Total Package / Box Count</Label>
+                  <Input name="total_packages" id="scheduledeliverymodal-total_packages"
                     type="number"
                     className="h-8 text-xs mt-1"
                     value={packagingSummary.total_packages}
@@ -619,8 +609,8 @@ export function ScheduleDeliveryModal({
               </div>
 
               <div>
-                <Label className="text-xs font-medium">Loading Instructions / Gate Pass Notes</Label>
-                <Textarea
+                <Label htmlFor="scheduledeliverymodal-gate-pass-reference-loading-dock-instructions-etc" className="text-xs font-medium">Loading Instructions / Gate Pass Notes</Label>
+                <Textarea name="gate-pass-reference-loading-dock-instructions-etc" id="scheduledeliverymodal-gate-pass-reference-loading-dock-instructions-etc"
                   rows={2}
                   className="text-xs mt-1"
                   placeholder="Gate pass reference, loading dock instructions, etc."
