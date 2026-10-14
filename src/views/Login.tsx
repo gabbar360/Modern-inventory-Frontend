@@ -7,26 +7,26 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/AuthContext";
+import { useLoginMutation } from "@/store/api/authApi";
+import { setCredentials } from "@/store/slices/authSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 export default function Login() {
-  const { login } = useAuth();
+  const dispatch = useAppDispatch();
+  const [loginMutation, { isLoading }] = useLoginMutation();
   const router = useRouter();
-  const [email, setEmail] = useState("chauhanashish360@gmail.com");
-  const [password, setPassword] = useState("Admin@123");
-  const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const submit = async (e) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
     try {
-      await login(email, password);
+      const data = await loginMutation({ email, password }).unwrap();
+      dispatch(setCredentials(data));
       toast.success("Welcome back");
       router.push("/dashboard");
-    } catch (err) {
-      toast.error(err?.response?.data?.detail || "Login failed");
-    } finally {
-      setBusy(false);
+    } catch (err: any) {
+      toast.error(err?.data?.detail || "Login failed");
     }
   };
 
@@ -51,15 +51,15 @@ export default function Login() {
                 required data-testid="login-password-input" className="mt-1" />
             </div>
           </div>
-          <Button type="submit" disabled={busy} className="w-full h-9" data-testid="login-submit-btn">
-            {busy ? "Signing in…" : "Sign in"}
+          <Button type="submit" disabled={isLoading} className="w-full h-9" data-testid="login-submit-btn">
+            {isLoading ? "Signing in…" : "Sign in"}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             No account? <Link href="/register" className="underline underline-offset-2 text-foreground" data-testid="register-link">Create organization</Link>
           </p>
           <div className="text-[11px] text-muted-foreground bg-muted/50 border border-border rounded-md p-3">
-            <p className="font-medium text-foreground/80 mb-1">Demo credentials</p>
-            <p>chauhanashish360@gmail.com · Admin@123</p>
+            <p className="font-medium text-foreground/80 mb-1">Default super admin</p>
+            <p>Run <span className="font-mono">npm run seed</span> to create the first admin account.</p>
           </div>
         </form>
       </div>

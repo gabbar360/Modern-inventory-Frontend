@@ -43,9 +43,11 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const USER_ROLES = {
+  SUPER_ADMIN: "SUPER_ADMIN",
   ADMIN: "admin",
   MANAGER: "manager",
-  SALES: "sales_executive",
+  SALES: "sales",
+  INVENTORY: "inventory",
   ACCOUNTANT: "accountant",
-  WAREHOUSE: "warehouse_manager",
+  VIEWER: "viewer",
 } as const;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
+import { useAppSelector } from "@/store/hooks";
+import { selectCurrentUser, selectCurrentOrg } from "@/store/slices/authSlice";
 import { api } from "@/lib/api";
 import { PageHeader } from "@/components/Bits";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { WhatsappLogo, CheckCircle, XCircle, Truck, EnvelopeSimple, FilePdf, Paperclip, Eye, Code, ArrowSquareOut, QrCode, PaperPlaneTilt, ArrowsClockwise } from "@phosphor-icons/react";
 
 export default function Settings() {
-  const { user, org } = useAuth();
+  const user = useAppSelector(selectCurrentUser);
+  const org = useAppSelector(selectCurrentOrg);
   const [wa, setWa] = useState({ business_account_id: "", phone_number_id: "", access_token: "", alert_to: "", configured: false });
   const [busy, setBusy] = useState(false);
   const backend = process.env.REACT_APP_BACKEND_URL;

@@ -1,7 +1,6 @@
 "use client";
 
 import DocList, { DocForm } from "./DocList";
-import VoiceQuoteButton from "@/components/VoiceQuote";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -14,20 +13,14 @@ import { money, fmtDate } from "@/lib/api";
 
 export default function Quotations() {
   const [rows, setRows] = useState([]);
-  const [prefill, setPrefill] = useState(null);
   const router = useRouter();
   const load = async () => { const { data } = await api.get("/quotations"); setRows(data); };
   useEffect(()=>{load();}, []);
   return (
     <div className="space-y-4" data-testid="quotation-page">
       <PageHeader title="Quotations" subtitle="Send priced offers and convert accepted quotes into sales orders." actions={
-        <div className="flex gap-2">
-          <VoiceQuoteButton onParsed={(d)=>setPrefill(d)} />
-          <DocForm kind="quotation" endpoint="/quotations" onCreated={load}
-            defaultCustomerId={prefill?.customer_id || ""}
-            openControl={prefill ? { open: true, onOpenChange: (v)=>!v && setPrefill(null) } : undefined}
+        <DocForm kind="quotation" endpoint="/quotations" onCreated={load}
             trigger={<Button size="sm" className="h-8" data-testid="new-quotation-btn"><Plus size={14} className="mr-1"/>New quotation</Button>} />
-        </div>
       } />
       {rows.length === 0 ? <EmptyState title="No quotations yet" /> :
         <div className="border border-border rounded-lg bg-card overflow-hidden">

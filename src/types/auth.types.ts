@@ -2,8 +2,9 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "manager" | "sales_executive" | "accountant" | "warehouse_manager";
-  organization_id?: string;
+  role: "SUPER_ADMIN" | "admin" | "manager" | "sales" | "inventory" | "accountant" | "viewer";
+  roleId?: string;
+  organization_id?: string | null;
   avatar_url?: string;
   created_at?: string;
 }

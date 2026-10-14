@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE_URL } from "@/lib/api";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 /**
  * Production Base RTK Query API (TypeScript)
@@ -11,7 +12,7 @@ export const baseApi = createApi({
     baseUrl: API_BASE_URL,
     prepareHeaders: (headers) => {
       if (typeof window !== "undefined") {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);
         }

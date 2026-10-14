@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { selectCurrentOrg, setCredentials } from "@/store/slices/authSlice";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,11 @@ import { CheckCircle, ArrowRight } from "@phosphor-icons/react";
 const STEPS = ["Company", "Tax & Bank", "Brand", "Warehouse", "Finish"];
 
 export default function Onboarding() {
-  const { org, refresh } = useAuth();
+  const dispatch = useAppDispatch();
+  const org = useAppSelector(selectCurrentOrg);
+  const refresh = async () => {
+    try { const { data } = await api.get("/auth/me"); dispatch(setCredentials(data)); } catch {}
+  };
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [comp, setComp] = useState({ name: org?.name || "", address: org?.address || "", city: "", state: org?.state || "", state_code: org?.state_code || "", pin: "", phone: org?.phone || "", email: org?.email || "", website: "" });

@@ -2,7 +2,9 @@
 
 import { useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useGetMeQuery } from "@/store/api/authApi";
+import { selectAuthStatus } from "@/store/slices/authSlice";
+import { useAppSelector } from "@/store/hooks";
 import AppShell from "@/components/layout/AppShell";
 
 interface DashboardLayoutProps {
@@ -10,11 +12,12 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { status } = useAuth();
+  useGetMeQuery();
+  const status = useAppSelector(selectAuthStatus);
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "out") {
+    if (status === "unauthenticated") {
       router.replace("/login");
     }
   }, [status, router]);
@@ -27,9 +30,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  if (status === "out") {
-    return null;
-  }
+  if (status === "unauthenticated") return null;
 
   return <AppShell>{children}</AppShell>;
 }

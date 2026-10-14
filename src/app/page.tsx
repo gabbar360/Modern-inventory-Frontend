@@ -2,16 +2,19 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useGetMeQuery } from "@/store/api/authApi";
+import { selectAuthStatus } from "@/store/slices/authSlice";
+import { useAppSelector } from "@/store/hooks";
 
 export default function HomePage() {
+  useGetMeQuery();
   const router = useRouter();
-  const { status } = useAuth();
+  const status = useAppSelector(selectAuthStatus);
 
   useEffect(() => {
-    if (status === "in") {
+    if (status === "authenticated") {
       router.replace("/dashboard");
-    } else if (status === "out") {
+    } else if (status === "unauthenticated") {
       router.replace("/login");
     }
   }, [status, router]);
