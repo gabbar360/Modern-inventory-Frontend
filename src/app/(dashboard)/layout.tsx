@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, ReactNode } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useGetMeQuery } from "@/store/api/authApi";
-import { selectAuthStatus } from "@/store/slices/authSlice";
+import { selectAuthStatus, selectIsAuthenticated } from "@/store/slices/authSlice";
 import { useAppSelector } from "@/store/hooks";
 import AppShell from "@/components/layout/AppShell";
 
@@ -12,17 +12,29 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  useGetMeQuery();
+  const [mounted, setMounted] = useState(false);
   const status = useAppSelector(selectAuthStatus);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const router = useRouter();
 
+  useGetMeQuery(undefined, {
+    skip: status === "unauthenticated",
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+  });
+
   useEffect(() => {
-    if (status === "unauthenticated") {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && status === "unauthenticated") {
       router.replace("/login");
     }
-  }, [status, router]);
+  }, [status, router, mounted]);
 
-  if (status === "loading") {
+  if (!mounted || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
         Loading workspace…
@@ -30,7 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  if (status === "unauthenticated") return null;
+  if (!isAuthenticated) return null;
 
   return <AppShell>{children}</AppShell>;
 }

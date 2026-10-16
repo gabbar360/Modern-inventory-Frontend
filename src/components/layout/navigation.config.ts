@@ -15,15 +15,12 @@ import {
   Warehouse,
   ChartBar,
   FileArrowDown,
-  CheckSquare,
   Buildings,
   ShieldCheck,
   Lightning,
   UploadSimple,
   ArrowUUpLeft,
-  Sparkle,
   ArrowsClockwise,
-  Megaphone,
   TrendUp,
   Wallet,
   Icon,
@@ -46,9 +43,6 @@ export const NAVIGATION_CONFIG: NavGroup[] = [
     group: "Workspace",
     items: [
       { to: "/dashboard", icon: House, label: "Dashboard", key: "dashboard" },
-      { to: "/tasks", icon: CheckSquare, label: "Tasks", key: "tasks" },
-      { to: "/approvals", icon: CheckSquare, label: "Approvals", key: "approvals" },
-      { to: "/ai", icon: Sparkle, label: "AI Copilot", key: "ai" },
     ],
   },
   {
@@ -56,7 +50,6 @@ export const NAVIGATION_CONFIG: NavGroup[] = [
     items: [
       { to: "/leads", icon: UsersThree, label: "Leads", key: "leads" },
       { to: "/customers", icon: UsersIcon, label: "Customers", key: "customers" },
-      { to: "/broadcast", icon: Megaphone, label: "Broadcast", key: "broadcast" },
     ],
   },
   {

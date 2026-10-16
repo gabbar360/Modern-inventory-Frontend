@@ -10,14 +10,32 @@ export interface User {
 }
 
 export interface Organization {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
+  legal_name?: string;
+  display_name?: string;
+  logo?: string;
   email?: string;
   phone?: string;
+  website?: string;
   address?: string;
+  city?: string;
+  state?: string;
+  state_code?: string;
+  country?: string;
+  pin?: string;
   gstin?: string;
-  currency?: string;
-  logo_url?: string;
+  pan?: string;
+  cin?: string;
+  tan?: string;
+  bank_name?: string;
+  account_holder?: string;
+  account_number?: string;
+  ifsc?: string;
+  swift?: string;
+  branch?: string;
+  upi_id?: string;
 }
 
 export interface AuthResponse {

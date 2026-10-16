@@ -15,7 +15,7 @@ const initialState: AuthState = {
   user: null,
   org: null,
   token: getInitialToken(),
-  status: "loading",
+  status: getInitialToken() ? "loading" : "unauthenticated",
 };
 
 export const authSlice = createSlice({
@@ -49,9 +49,7 @@ export const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addMatcher(authApi.endpoints.getMe.matchPending, (state) => {
-        if (!state.user) state.status = "loading";
-      })
+
       .addMatcher(authApi.endpoints.getMe.matchFulfilled, (state, action) => {
         state.user = action.payload.user;
         state.org = action.payload.organization;
