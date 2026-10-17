@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { selectCurrentUser, selectCurrentOrg, setCredentials } from "@/store/slices/authSlice";
-import { useUpdateProfileMutation, useUpdateOrganizationMutation, useChangePasswordMutation } from "@/store/api/profileApi";
+import { selectCurrentUser, selectCurrentOrg, setCredentials } from "@/slices/authSlice";
+import { api } from "@/utils/api";
+import { settingsService } from "@/services/settingsService";
 import { PageHeader } from "@/components/Bits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,9 @@ export default function Settings() {
   const user = useAppSelector(selectCurrentUser);
   const org = useAppSelector(selectCurrentOrg);
 
-  const [updateProfile, { isLoading: savingProfile }] = useUpdateProfileMutation();
-  const [updateOrganization, { isLoading: savingOrg }] = useUpdateOrganizationMutation();
-  const [changePassword, { isLoading: savingPassword }] = useChangePasswordMutation();
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingOrg, setSavingOrg] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
   const [profile, setProfile] = useState({ name: "", email: "", phone: "" });
   const [orgForm, setOrgForm] = useState({
@@ -43,22 +44,28 @@ export default function Settings() {
     setOrgForm((s) => ({ ...s, [k]: e.target.value }));
 
   const handleSaveProfile = async () => {
+    setSavingProfile(true);
     try {
-      const res = await updateProfile(profile).unwrap();
-      dispatch(setCredentials({ user: res.user }));
+      const res = await api.patch("/auth/profile", profile);
+      dispatch(setCredentials({ user: res.data.user }));
       toast.success("Profile updated successfully");
     } catch (e: any) {
-      toast.error(e?.data?.detail || "Failed to update profile");
+      toast.error(e?.response?.data?.detail || e?.message || "Failed to update profile");
+    } finally {
+      setSavingProfile(false);
     }
   };
 
   const handleSaveOrg = async () => {
+    setSavingOrg(true);
     try {
-      const res = await updateOrganization(orgForm).unwrap();
+      const res = await settingsService.updateSettings(orgForm);
       dispatch(setCredentials({ organization: res.organization }));
       toast.success("Organization updated successfully");
     } catch (e: any) {
-      toast.error(e?.data?.detail || "Failed to update organization");
+      toast.error(e?.response?.data?.detail || e?.message || "Failed to update organization");
+    } finally {
+      setSavingOrg(false);
     }
   };
 
@@ -67,12 +74,15 @@ export default function Settings() {
       return toast.error("All password fields are required");
     if (passwords.new_password !== passwords.confirm_password)
       return toast.error("New passwords do not match");
+    setSavingPassword(true);
     try {
-      await changePassword({ current_password: passwords.current_password, new_password: passwords.new_password }).unwrap();
+      await api.post("/auth/change-password", { current_password: passwords.current_password, new_password: passwords.new_password });
       toast.success("Password changed successfully");
       setPasswords({ current_password: "", new_password: "", confirm_password: "" });
     } catch (e: any) {
-      toast.error(e?.data?.detail || "Failed to change password");
+      toast.error(e?.response?.data?.detail || e?.message || "Failed to change password");
+    } finally {
+      setSavingPassword(false);
     }
   };
 

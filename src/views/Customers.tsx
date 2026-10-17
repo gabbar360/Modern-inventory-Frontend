@@ -22,6 +22,13 @@ import {
   CheckCircle,
   Truck
 } from "@phosphor-icons/react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  fetchCustomers,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer as deleteCustomerAction,
+} from "@/slices/customerSlice";
 
 const GST_STATE_CODE_MAP = {
   "01": "Jammu and Kashmir", "02": "Himachal Pradesh", "03": "Punjab", "04": "Chandigarh",
@@ -37,7 +44,8 @@ const GST_STATE_CODE_MAP = {
 };
 
 export default function Customers() {
-  const [rows, setRows] = useState([]);
+  const dispatch = useAppDispatch();
+  const { customers: rows = [] } = useAppSelector((state) => state.customers);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -74,16 +82,13 @@ export default function Customers() {
 
   const upd = (k) => (e) => setF((s) => ({ ...s, [k]: e?.target ? e.target.value : e }));
 
-  const load = async () => {
-    try {
-      const { data } = await api.get("/customers");
-      setRows(data || []);
-    } catch (e) {
-      console.error("Failed to load customers:", e);
-    }
+  const load = () => {
+    dispatch(fetchCustomers());
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, [dispatch]);
 
   const openNew = () => {
     setEditingId(null);
@@ -300,17 +305,17 @@ export default function Customers() {
 
     try {
       if (editingId) {
-        await api.patch(`/customers/${editingId}`, payload);
+        await dispatch(updateCustomer({ id: editingId, data: payload })).unwrap();
         toast.success("Customer updated successfully");
       } else {
-        await api.post("/customers", payload);
+        await dispatch(createCustomer(payload)).unwrap();
         toast.success("Customer created successfully");
       }
       setOpen(false);
       setEditingId(null);
       load();
-    } catch (e) {
-      toast.error(e?.response?.data?.detail || "Operation failed");
+    } catch (e: any) {
+      toast.error(e?.message || e || "Operation failed");
     } finally {
       setBusy(false);
     }
@@ -320,11 +325,11 @@ export default function Customers() {
     if (e) e.stopPropagation();
     if (!window.confirm(`Are you sure you want to delete "${cust.company_name}"?`)) return;
     try {
-      await api.delete(`/customers/${cust.id}`);
+      await dispatch(deleteCustomerAction(cust.id)).unwrap();
       toast.success(`Customer "${cust.company_name}" deleted`);
       load();
-    } catch (e) {
-      toast.error(e?.response?.data?.detail || "Failed to delete customer");
+    } catch (e: any) {
+      toast.error(e?.message || e || "Failed to delete customer");
     }
   };
 

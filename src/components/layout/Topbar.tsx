@@ -12,8 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import NotificationBell from "./NotificationBell";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { selectCurrentUser, selectCurrentOrg, logout } from "@/store/slices/authSlice";
-import { useLogoutMutation } from "@/store/api/authApi";
+import { selectCurrentUser, selectCurrentOrg, logoutUser } from "@/slices/authSlice";
 
 interface TopbarProps {
   onSearch: () => void;
@@ -23,7 +22,6 @@ export default function Topbar({ onSearch }: TopbarProps) {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectCurrentUser);
   const org = useAppSelector(selectCurrentOrg);
-  const [logoutMutation] = useLogoutMutation();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
@@ -32,8 +30,7 @@ export default function Topbar({ onSearch }: TopbarProps) {
   }, [user]);
 
   const handleLogout = async () => {
-    try { await logoutMutation().unwrap(); } catch {}
-    dispatch(logout());
+    await dispatch(logoutUser());
     router.replace("/login");
   };
 

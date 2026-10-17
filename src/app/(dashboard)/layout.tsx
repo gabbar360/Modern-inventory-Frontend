@@ -2,9 +2,8 @@
 
 import { useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useGetMeQuery } from "@/store/api/authApi";
-import { selectAuthStatus, selectIsAuthenticated } from "@/store/slices/authSlice";
-import { useAppSelector } from "@/store/hooks";
+import { checkAuth, selectAuthStatus, selectIsAuthenticated } from "@/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import AppShell from "@/components/layout/AppShell";
 
 interface DashboardLayoutProps {
@@ -12,21 +11,18 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const dispatch = useAppDispatch();
   const [mounted, setMounted] = useState(false);
   const status = useAppSelector(selectAuthStatus);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const router = useRouter();
 
-  useGetMeQuery(undefined, {
-    skip: status === "unauthenticated",
-    refetchOnMountOrArgChange: false,
-    refetchOnFocus: false,
-    refetchOnReconnect: false,
-  });
-
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (status !== "unauthenticated") {
+      dispatch(checkAuth());
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     if (mounted && status === "unauthenticated") {

@@ -10,7 +10,14 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
-import { useLazySearchGlobalQuery, SearchResultItem } from "@/store/api/searchApi";
+import { dashboardService } from "@/services/dashboardService";
+
+export interface SearchResultItem {
+  id: string;
+  type: "Lead" | "Customer" | "Product" | "Quotation" | "Sales Order" | "Invoice" | string;
+  title: string;
+  subtitle?: string;
+}
 
 interface GlobalSearchProps {
   open: boolean;
@@ -19,16 +26,28 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ open, setOpen }: GlobalSearchProps) {
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResultItem[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
   const router = useRouter();
-  const [triggerSearch, { data, isFetching }] = useLazySearchGlobalQuery();
 
   useEffect(() => {
-    if (!query || query.trim().length < 2) return;
-    const timer = setTimeout(() => {
-      triggerSearch(query.trim());
+    if (!query || query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsFetching(true);
+      try {
+        const res: any = await dashboardService.globalSearch(query.trim());
+        setResults(res?.results || res || []);
+      } catch (err) {
+        console.warn("Search failed:", err);
+      } finally {
+        setIsFetching(false);
+      }
     }, 250);
     return () => clearTimeout(timer);
-  }, [query, triggerSearch]);
+  }, [query]);
 
   const handleSelect = (item: SearchResultItem) => {
     setOpen(false);
@@ -42,8 +61,6 @@ export default function GlobalSearch({ open, setOpen }: GlobalSearchProps) {
     };
     router.push(routeMap[item.type] || "/dashboard");
   };
-
-  const results = data?.results || [];
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>

@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/Bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip as RTooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { ArrowUpRight, TrendUp, Users, Receipt, Wallet, Package, ClockCounterClockwise, ClipboardText } from "@phosphor-icons/react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchDashboardStats } from "@/slices/dashboardSlice";
 
 const KPI = ({ label, value, icon: Icon, hint, testId }) => (
   <Card className="card-hover" data-testid={testId}>
@@ -24,46 +26,35 @@ const KPI = ({ label, value, icon: Icon, hint, testId }) => (
   </Card>
 );
 
+const emptyDashboard = {
+  total_sales: 0,
+  receivable: 0,
+  cash_in: 0,
+  customers: 0,
+  open_quotes: 0,
+  confirmed_so: 0,
+  pending_invoices: 0,
+  new_leads: 0,
+  conversion_rate: 0,
+  sales_trend: [],
+  pipeline: [
+    { stage: "new", count: 0 },
+    { stage: "contacted", count: 0 },
+    { stage: "proposal", count: 0 },
+    { stage: "won", count: 0 },
+  ],
+  top_customers: [],
+};
+
 export default function Dashboard() {
-  const [d, setD] = useState(null);
+  const dispatch = useAppDispatch();
+  const { stats, loading } = useAppSelector((state) => state.dashboard);
+
   useEffect(() => {
-    api.get("/dashboard/stats")
-      .then((r) => setD(r.data))
-      .catch((err) => {
-        console.warn("Using fallback metrics:", err.message);
-        setD({
-          total_sales: 1540000,
-          receivable: 320000,
-          cash_in: 1220000,
-          customers: 48,
-          open_quotes: 12,
-          confirmed_so: 18,
-          pending_invoices: 6,
-          new_leads: 24,
-          conversion_rate: 34,
-          sales_trend: [
-            { month: "Jan", value: 120000 },
-            { month: "Feb", value: 240000 },
-            { month: "Mar", value: 380000 },
-            { month: "Apr", value: 510000 },
-            { month: "May", value: 780000 },
-            { month: "Jun", value: 1540000 }
-          ],
-          pipeline: [
-            { stage: "new", count: 8 },
-            { stage: "contacted", count: 6 },
-            { stage: "proposal", count: 5 },
-            { stage: "won", count: 5 }
-          ],
-          top_customers: [
-            { name: "Acme Corp", value: 450000 },
-            { name: "Apex Ltd", value: 320000 },
-            { name: "Starlight Inc", value: 280000 }
-          ]
-        });
-      });
-  }, []);
-  if (!d) return <div className="text-sm text-muted-foreground">Loading dashboard…</div>;
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
+
+  const d = stats || emptyDashboard;
 
   return (
     <div className="space-y-6" data-testid="dashboard-page">
@@ -113,15 +104,21 @@ export default function Dashboard() {
       <Card>
         <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Top customers</CardTitle></CardHeader>
         <CardContent className="pt-2">
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={d?.top_customers || []} layout="vertical" margin={{ left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => compactMoney(v)} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={160} />
-              <RTooltip contentStyle={{ fontSize: 12, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }} formatter={(v) => compactMoney(v)} />
-              <Bar dataKey="value" fill="hsl(var(--foreground))" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {d?.top_customers && d.top_customers.length > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={d.top_customers} layout="vertical" margin={{ left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => compactMoney(v)} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={160} />
+                <RTooltip contentStyle={{ fontSize: 12, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }} formatter={(v) => compactMoney(v)} />
+                <Bar dataKey="value" fill="hsl(var(--foreground))" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[180px] flex items-center justify-center text-xs text-muted-foreground">
+              No customer invoices recorded yet.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

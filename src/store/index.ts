@@ -1,25 +1,8 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
-import { rootReducer } from "./rootReducer";
-import { baseApi } from "./api/baseApi";
+export { store } from "./store";
+export type { RootState, AppDispatch, AppStore } from "./store";
+export { useAppDispatch, useAppSelector } from "./hooks";
 
-export const makeStore = (preloadedState = {}) => {
-  const store = configureStore({
-    reducer: rootReducer,
-    preloadedState,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        serializableCheck: false,
-      }).concat(baseApi.middleware),
-    devTools: process.env.NODE_ENV !== "production",
-  });
-
-  setupListeners(store.dispatch);
-  return store;
+// Next.js App Router store creation helper
+export const makeStore = () => {
+  return (require("./store") as typeof import("./store")).store;
 };
-
-export const store = makeStore();
-
-export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<typeof rootReducer>;
-export type AppDispatch = AppStore["dispatch"];

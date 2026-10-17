@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { money } from "@/lib/formatters";
 import { PageHeader, EmptyState } from "@/components/Bits";
@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Plus, X } from "@phosphor-icons/react";
-import { useGetProductsQuery, useCreateProductMutation } from "@/store/api/productsApi";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchProducts, createProduct } from "@/slices/productSlice";
 
 const INITIAL_FORM = {
   name: "",
@@ -30,12 +31,21 @@ const INITIAL_FORM = {
 };
 
 export default function Products() {
-  const { data: rows = [], isLoading } = useGetProductsQuery();
-  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const dispatch = useAppDispatch();
+  const { products: rows = [], loading: isLoading } = useAppSelector((state) => state.products);
 
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [f, setF] = useState(INITIAL_FORM);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const load = () => {
+    dispatch(fetchProducts());
+  };
+
+  useEffect(() => {
+    load();
+  }, [dispatch]);
 
   const upd = (k) => (e) =>
     setF((s) => ({
@@ -76,17 +86,21 @@ export default function Products() {
       toast.error("Product SKU is required");
       return;
     }
+    setIsCreating(true);
     try {
-      await createProduct({
+      await dispatch(createProduct({
         ...f,
         name: f.name.trim(),
         sku: f.sku.trim(),
-      }).unwrap();
+      })).unwrap();
       toast.success("Product created successfully");
       setOpen(false);
       setF(INITIAL_FORM);
-    } catch (e) {
-      toast.error(e?.data?.detail || e?.message || "Failed to create product");
+      load();
+    } catch (e: any) {
+      toast.error(e?.message || e || "Failed to create product");
+    } finally {
+      setIsCreating(false);
     }
   };
 

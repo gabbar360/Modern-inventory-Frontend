@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { selectCurrentOrg, setCredentials } from "@/store/slices/authSlice";
+import { selectCurrentOrg, setCredentials } from "@/slices/authSlice";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

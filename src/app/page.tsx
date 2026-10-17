@@ -2,14 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useGetMeQuery } from "@/store/api/authApi";
-import { selectAuthStatus } from "@/store/slices/authSlice";
-import { useAppSelector } from "@/store/hooks";
+import { checkAuth, selectAuthStatus } from "@/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function HomePage() {
-  useGetMeQuery();
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const status = useAppSelector(selectAuthStatus);
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
 
   useEffect(() => {
     if (status === "authenticated") {
