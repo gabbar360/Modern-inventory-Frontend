@@ -7,13 +7,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLoginMutation } from "@/store/api/authApi";
-import { setCredentials } from "@/store/slices/authSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { loginUser } from "@/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function Login() {
   const dispatch = useAppDispatch();
-  const [loginMutation, { isLoading }] = useLoginMutation();
+  const { loading: isLoading } = useAppSelector((state) => state.auth);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,12 +20,11 @@ export default function Login() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await loginMutation({ email, password }).unwrap();
-      dispatch(setCredentials(data));
+      await dispatch(loginUser({ email, password })).unwrap();
       toast.success("Welcome back");
       router.push("/dashboard");
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Login failed");
+      toast.error(typeof err === "string" ? err : err?.detail || "Login failed");
     }
   };
 

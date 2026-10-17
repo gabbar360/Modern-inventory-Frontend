@@ -11,7 +11,7 @@ import {
   selectSearchModalOpen,
   toggleSidebar,
   setSearchModalOpen,
-} from "@/store/slices/uiSlice";
+} from "@/slices/uiSlice";
 
 interface AppShellProps {
   children: ReactNode;

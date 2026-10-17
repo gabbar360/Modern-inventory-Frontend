@@ -7,13 +7,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRegisterMutation } from "@/store/api/authApi";
-import { setCredentials } from "@/store/slices/authSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { registerUser } from "@/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function Register() {
   const dispatch = useAppDispatch();
-  const [registerMutation, { isLoading }] = useRegisterMutation();
+  const { loading: isLoading } = useAppSelector((state) => state.auth);
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "", organization_name: "" });
   const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((s) => ({ ...s, [k]: e.target.value }));
@@ -21,12 +20,11 @@ export default function Register() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await registerMutation(form).unwrap();
-      dispatch(setCredentials(data));
+      await dispatch(registerUser(form)).unwrap();
       toast.success("Organization created");
       router.push("/dashboard");
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed");
+      toast.error(typeof err === "string" ? err : err?.detail || "Failed");
     }
   };
 

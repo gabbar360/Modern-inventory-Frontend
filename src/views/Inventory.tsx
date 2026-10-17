@@ -14,11 +14,18 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import {
   Plus, ArrowsDownUp, TrendUp, TrendDown, WhatsappLogo, Warning, CurrencyInr, Broadcast, Sparkle, Fire
 } from "@phosphor-icons/react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchProducts } from "@/slices/productSlice";
+import {
+  fetchStockMovements,
+  fetchStockHealth,
+  adjustStock,
+} from "@/slices/inventorySlice";
 
 export default function Inventory() {
-  const [products, setProducts] = useState([]);
-  const [movements, setMovements] = useState([]);
-  const [stockHealth, setStockHealth] = useState(null);
+  const dispatch = useAppDispatch();
+  const { products = [] } = useAppSelector((state) => state.products);
+  const { movements = [], stockHealth = null } = useAppSelector((state) => state.inventory);
   const [filterMode, setFilterMode] = useState("all"); // 'all' | 'critical' | 'dead'
   const [open, setOpen] = useState(false);
 
@@ -33,34 +40,25 @@ export default function Inventory() {
   const [customMsg, setCustomMsg] = useState("");
   const [sendingClearance, setSendingClearance] = useState(false);
 
-  const load = async () => {
-    try {
-      const [p, m, h] = await Promise.all([
-        api.get("/products"),
-        api.get("/inventory/movements"),
-        api.get("/inventory/stock-health")
-      ]);
-      setProducts(p.data || []);
-      setMovements(m.data || []);
-      setStockHealth(h.data || null);
-    } catch (err) {
-      console.warn("Failed to load inventory data:", err.message);
-    }
+  const load = () => {
+    dispatch(fetchProducts());
+    dispatch(fetchStockMovements());
+    dispatch(fetchStockHealth());
   };
 
   useEffect(() => {
     load();
-  }, []);
+  }, [dispatch]);
 
   const submitAdjustment = async () => {
     if (!f.product_id) return toast.error("Pick product");
     try {
-      await api.post("/inventory/adjust", f);
+      await dispatch(adjustStock(f)).unwrap();
       toast.success("Stock updated");
       setOpen(false);
       load();
-    } catch (e) {
-      toast.error(e?.response?.data?.detail || "Failed");
+    } catch (e: any) {
+      toast.error(e?.message || e || "Failed");
     }
   };
 

@@ -7,11 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Plus, PencilSimple, Trash } from "@phosphor-icons/react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  fetchVendors,
+  createVendor,
+  updateVendor,
+  deleteVendor as deleteVendorAction,
+} from "@/slices/vendorSlice";
 
 export default function Vendors() {
-  const [rows, setRows] = useState([]);
+  const dispatch = useAppDispatch();
+  const { vendors: rows = [] } = useAppSelector((state) => state.vendors);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -34,12 +41,13 @@ export default function Vendors() {
 
   const upd = (k) => (e) => setF((s) => ({ ...s, [k]: e?.target ? e.target.value : e }));
 
-  const load = async () => {
-    const { data } = await api.get("/vendors");
-    setRows(data);
+  const load = () => {
+    dispatch(fetchVendors());
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, [dispatch]);
 
   const openNew = () => {
     setEditingId(null);
@@ -71,17 +79,17 @@ export default function Vendors() {
     setBusy(true);
     try {
       if (editingId) {
-        await api.patch(`/vendors/${editingId}`, f);
+        await dispatch(updateVendor({ id: editingId, data: f })).unwrap();
         toast.success("Vendor updated successfully");
       } else {
-        await api.post("/vendors", f);
+        await dispatch(createVendor(f)).unwrap();
         toast.success("Vendor added successfully");
       }
       setOpen(false);
       setEditingId(null);
       load();
-    } catch (e) {
-      toast.error(e?.response?.data?.detail || "Operation failed");
+    } catch (e: any) {
+      toast.error(e?.message || e || "Operation failed");
     } finally {
       setBusy(false);
     }
@@ -91,11 +99,11 @@ export default function Vendors() {
     if (e) e.stopPropagation();
     if (!window.confirm(`Are you sure you want to delete vendor "${v.company_name}"?`)) return;
     try {
-      await api.delete(`/vendors/${v.id}`);
+      await dispatch(deleteVendorAction(v.id)).unwrap();
       toast.success(`Vendor "${v.company_name}" deleted`);
       load();
-    } catch (e) {
-      toast.error(e?.response?.data?.detail || "Failed to delete vendor");
+    } catch (e: any) {
+      toast.error(e?.message || e || "Failed to delete vendor");
     }
   };
 

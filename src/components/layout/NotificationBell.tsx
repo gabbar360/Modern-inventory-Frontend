@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Bell } from "@phosphor-icons/react";
 import {
   DropdownMenu,
@@ -8,23 +9,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import {
-  useGetNotificationsQuery,
-  useMarkNotificationReadMutation,
-  NotificationItem,
-} from "@/store/api/notificationsApi";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchNotifications, markNotificationRead } from "@/slices/dashboardSlice";
 
 export default function NotificationBell() {
-  const { data: notifications = [] } = useGetNotificationsQuery(undefined, {
-    pollingInterval: 30000,
-  });
-  const [markRead] = useMarkNotificationReadMutation();
+  const dispatch = useAppDispatch();
+  const { notifications = [] } = useAppSelector((state) => state.dashboard);
 
-  const unreadCount = notifications.filter((n: NotificationItem) => !n.read).length;
+  useEffect(() => {
+    dispatch(fetchNotifications());
+    const interval = setInterval(() => {
+      dispatch(fetchNotifications());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
+
+  const unreadCount = notifications.filter((n: any) => !n.is_read && !n.read).length;
 
   const handleMarkAllRead = async () => {
-    const unread = notifications.filter((n: NotificationItem) => !n.read);
-    await Promise.all(unread.map((n: NotificationItem) => markRead(n.id)));
+    const unread = notifications.filter((n: any) => !n.is_read && !n.read);
+    await Promise.all(unread.map((n: any) => dispatch(markNotificationRead(n.id))));
   };
 
   return (
@@ -62,11 +66,11 @@ export default function NotificationBell() {
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto divide-y divide-border/40">
-            {notifications.slice(0, 10).map((n: NotificationItem) => (
+            {notifications.slice(0, 10).map((n: any) => (
               <div
                 key={n.id}
                 className={`px-3 py-2.5 text-xs transition-colors ${
-                  !n.read ? "bg-muted/40 font-medium" : "text-muted-foreground"
+                  !n.is_read && !n.read ? "bg-muted/40 font-medium" : "text-muted-foreground"
                 }`}
                 data-testid={`notif-item-${n.id}`}
               >

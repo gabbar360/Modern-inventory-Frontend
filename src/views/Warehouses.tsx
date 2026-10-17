@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/Bits";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Plus, Warehouse as WhIcon } from "@phosphor-icons/react";
-import { useGetWarehousesQuery, useCreateWarehouseMutation } from "@/store/api/warehousesApi";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchWarehouses, createWarehouse as createWarehouseAction } from "@/slices/warehouseSlice";
 
 const INITIAL_WAREHOUSE = {
   name: "",
@@ -21,11 +22,20 @@ const INITIAL_WAREHOUSE = {
 };
 
 export default function Warehouses() {
-  const { data: rows = [], isLoading } = useGetWarehousesQuery();
-  const [createWarehouse, { isLoading: isCreating }] = useCreateWarehouseMutation();
+  const dispatch = useAppDispatch();
+  const { warehouses: rows = [], loading: isLoading } = useAppSelector((state) => state.warehouses);
 
   const [open, setOpen] = useState(false);
   const [f, setF] = useState(INITIAL_WAREHOUSE);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const load = () => {
+    dispatch(fetchWarehouses());
+  };
+
+  useEffect(() => {
+    load();
+  }, [dispatch]);
 
   const upd = (k) => (e) =>
     setF((s) => ({
@@ -35,13 +45,17 @@ export default function Warehouses() {
 
   const submit = async () => {
     if (!f.name || !f.name.trim()) return toast.error("Warehouse name is required");
+    setIsCreating(true);
     try {
-      await createWarehouse({ ...f, name: f.name.trim() }).unwrap();
+      await dispatch(createWarehouseAction({ ...f, name: f.name.trim() })).unwrap();
       toast.success("Warehouse added successfully");
       setOpen(false);
       setF(INITIAL_WAREHOUSE);
-    } catch (e) {
-      toast.error(e?.data?.detail || e?.message || "Failed to add warehouse");
+      load();
+    } catch (e: any) {
+      toast.error(e?.message || e || "Failed to add warehouse");
+    } finally {
+      setIsCreating(false);
     }
   };
 

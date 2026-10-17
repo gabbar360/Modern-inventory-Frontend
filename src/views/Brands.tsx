@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/Bits";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Plus } from "@phosphor-icons/react";
-import { useGetBrandsQuery, useCreateBrandMutation } from "@/store/api/brandsApi";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchBrands, createBrand as createBrandAction } from "@/slices/brandSlice";
 
 const INITIAL_BRAND = {
   name: "",
@@ -23,23 +24,36 @@ const INITIAL_BRAND = {
 };
 
 export default function Brands() {
-  const { data: rows = [], isLoading } = useGetBrandsQuery();
-  const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation();
+  const dispatch = useAppDispatch();
+  const { brands: rows = [], loading: isLoading } = useAppSelector((state) => state.brands);
 
   const [open, setOpen] = useState(false);
   const [f, setF] = useState(INITIAL_BRAND);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const load = () => {
+    dispatch(fetchBrands());
+  };
+
+  useEffect(() => {
+    load();
+  }, [dispatch]);
 
   const upd = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
   const submit = async () => {
     if (!f.name || !f.name.trim()) return toast.error("Brand name is required");
+    setIsCreating(true);
     try {
-      await createBrand({ ...f, name: f.name.trim() }).unwrap();
+      await dispatch(createBrandAction({ ...f, name: f.name.trim() })).unwrap();
       toast.success("Brand created successfully");
       setOpen(false);
       setF(INITIAL_BRAND);
-    } catch (e) {
-      toast.error(e?.data?.detail || e?.message || "Failed to create brand");
+      load();
+    } catch (e: any) {
+      toast.error(e?.message || e || "Failed to create brand");
+    } finally {
+      setIsCreating(false);
     }
   };
 
